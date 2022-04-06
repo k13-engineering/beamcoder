@@ -22,12 +22,29 @@
 #include "frame.h"
 #include "hwcontext.h"
 
+napi_status getFrameFromCallbackInfo(napi_env env, napi_callback_info info, frameData** f) {
+  napi_value thisArg;
+  napi_value extFrame;
+  napi_status status;
+
+  status = napi_get_cb_info(env, info, 0, NULL, &thisArg, nullptr);
+  PASS_STATUS;
+
+  status = napi_get_named_property(env, thisArg, "_frame", &extFrame);
+  PASS_STATUS;
+
+  status = napi_get_value_external(env, extFrame, (void**) f);
+  PASS_STATUS;
+
+  return napi_ok;
+}
+
 napi_value getFrameLinesize(napi_env env, napi_callback_info info) {
   napi_status status;
   napi_value array, element;
   frameData* f;
 
-  status = napi_get_cb_info(env, info, 0, nullptr, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
   CHECK_STATUS;
 
   status = napi_create_array(env, &array);
@@ -55,7 +72,10 @@ napi_value setFrameLinesize(napi_env env, napi_callback_info info) {
   size_t argc = 1;
   napi_value args[1];
 
-  status = napi_get_cb_info(env, info, &argc, args, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
+  CHECK_STATUS;
+
+  status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
   CHECK_STATUS;
   if (argc < 1) {
     NAPI_THROW_ERROR("Set frame linesize must be provided with a value.");
@@ -99,7 +119,7 @@ napi_value getFrameWidth(napi_env env, napi_callback_info info) {
   napi_value result;
   frameData* f;
 
-  status = napi_get_cb_info(env, info, 0, nullptr, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
   CHECK_STATUS;
 
   status = napi_create_int32(env, f->frame->width, &result);
@@ -116,7 +136,10 @@ napi_value setFrameWidth(napi_env env, napi_callback_info info) {
   size_t argc = 1;
   napi_value args[1];
 
-  status = napi_get_cb_info(env, info, &argc, args, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
+  CHECK_STATUS;
+
+  status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
   CHECK_STATUS;
   if (argc < 1) {
     NAPI_THROW_ERROR("Set frame width must be provided with a value.");
@@ -139,7 +162,7 @@ napi_value getFrameHeight(napi_env env, napi_callback_info info) {
   napi_value result;
   frameData* f;
 
-  status = napi_get_cb_info(env, info, 0, nullptr, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
   CHECK_STATUS;
 
   status = napi_create_int32(env, f->frame->height, &result);
@@ -156,7 +179,10 @@ napi_value setFrameHeight(napi_env env, napi_callback_info info) {
   size_t argc = 1;
   napi_value args[1];
 
-  status = napi_get_cb_info(env, info, &argc, args, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
+  CHECK_STATUS;
+
+  status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
   CHECK_STATUS;
   if (argc < 1) {
     NAPI_THROW_ERROR("Set frame height must be provided with a value.");
@@ -179,7 +205,7 @@ napi_value getFrameNbSamples(napi_env env, napi_callback_info info) {
   napi_value result;
   frameData* f;
 
-  status = napi_get_cb_info(env, info, 0, nullptr, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
   CHECK_STATUS;
 
   status = napi_create_int32(env, f->frame->nb_samples, &result);
@@ -196,7 +222,10 @@ napi_value setFrameNbSamples(napi_env env, napi_callback_info info) {
   size_t argc = 1;
   napi_value args[1];
 
-  status = napi_get_cb_info(env, info, &argc, args, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
+  CHECK_STATUS;
+
+  status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
   CHECK_STATUS;
   if (argc < 1) {
     NAPI_THROW_ERROR("Set frame nb_samples must be provided with a value.");
@@ -220,7 +249,7 @@ napi_value getFrameFormat(napi_env env, napi_callback_info info) {
   frameData* f;
   const char* name = nullptr;
 
-  status = napi_get_cb_info(env, info, 0, nullptr, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
   CHECK_STATUS;
 
   // Assume audio data using FFmpeg's own technique
@@ -252,7 +281,10 @@ napi_value setFrameFormat(napi_env env, napi_callback_info info) {
   size_t argc = 1;
   napi_value args[1];
 
-  status = napi_get_cb_info(env, info, &argc, args, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
+  CHECK_STATUS;
+
+  status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
   CHECK_STATUS;
   if (argc < 1) {
     NAPI_THROW_ERROR("Set frame format must be provided with a value.");
@@ -295,7 +327,7 @@ napi_value getFrameKeyFrame(napi_env env, napi_callback_info info) {
   napi_value result;
   frameData* f;
 
-  status = napi_get_cb_info(env, info, 0, nullptr, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
   CHECK_STATUS;
 
   status = napi_get_boolean(env, (f->frame->key_frame == 1), &result);
@@ -313,7 +345,10 @@ napi_value setFrameKeyFrame(napi_env env, napi_callback_info info) {
   size_t argc = 1;
   napi_value args[1];
 
-  status = napi_get_cb_info(env, info, &argc, args, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
+  CHECK_STATUS;
+
+  status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
   CHECK_STATUS;
   if (argc < 1) {
     NAPI_THROW_ERROR("Set frame key_frame must be provided with a value.");
@@ -338,7 +373,7 @@ napi_value getFramePictType(napi_env env, napi_callback_info info) {
   frameData* f;
   const char* name;
 
-  status = napi_get_cb_info(env, info, 0, nullptr, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
   CHECK_STATUS;
 
   switch (f->frame->pict_type) {
@@ -388,7 +423,10 @@ napi_value setFramePictType(napi_env env, napi_callback_info info) {
   size_t argc = 1;
   napi_value args[1];
 
-  status = napi_get_cb_info(env, info, &argc, args, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
+  CHECK_STATUS;
+
+  status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
   CHECK_STATUS;
   if (argc < 1) {
     NAPI_THROW_ERROR("Set frame pict_type must be provided with a value.");
@@ -451,7 +489,7 @@ napi_value getFrameSampleAR(napi_env env, napi_callback_info info) {
   napi_value result, element;
   frameData* f;
 
-  status = napi_get_cb_info(env, info, 0, nullptr, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
   CHECK_STATUS;
 
   status = napi_create_array(env, &result);
@@ -478,7 +516,10 @@ napi_value setFrameSampleAR(napi_env env, napi_callback_info info) {
   size_t argc = 1;
   napi_value args[1];
 
-  status = napi_get_cb_info(env, info, &argc, args, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
+  CHECK_STATUS;
+
+  status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
   CHECK_STATUS;
   if (argc < 1) {
     NAPI_THROW_ERROR("Set frame sample_aspect_ratio must be provided with a value.");
@@ -516,7 +557,7 @@ napi_value getFramePTS(napi_env env, napi_callback_info info) {
   napi_value result;
   frameData* f;
 
-  status = napi_get_cb_info(env, info, 0, nullptr, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
   CHECK_STATUS;
 
   if (f->frame->pts == AV_NOPTS_VALUE) {
@@ -539,7 +580,10 @@ napi_value setFramePTS(napi_env env, napi_callback_info info) {
   size_t argc = 1;
   napi_value args[1];
 
-  status = napi_get_cb_info(env, info, &argc, args, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
+  CHECK_STATUS;
+
+  status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
   CHECK_STATUS;
   if (argc < 1) {
     NAPI_THROW_ERROR("Set frame PTS must be provided with a value.");
@@ -567,7 +611,7 @@ napi_value getFramePktDTS(napi_env env, napi_callback_info info) {
   napi_value result;
   frameData* f;
 
-  status = napi_get_cb_info(env, info, 0, nullptr, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
   CHECK_STATUS;
 
   if (f->frame->pkt_dts == AV_NOPTS_VALUE) {
@@ -590,7 +634,10 @@ napi_value setFramePktDTS(napi_env env, napi_callback_info info) {
   size_t argc = 1;
   napi_value args[1];
 
-  status = napi_get_cb_info(env, info, &argc, args, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
+  CHECK_STATUS;
+
+  status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
   CHECK_STATUS;
   if (argc < 1) {
     NAPI_THROW_ERROR("Set frame pkt_dts must be provided with a value.");
@@ -618,7 +665,7 @@ napi_value getFrameCodedPicNum(napi_env env, napi_callback_info info) {
   napi_value result;
   frameData* f;
 
-  status = napi_get_cb_info(env, info, 0, nullptr, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
   CHECK_STATUS;
 
   status = napi_create_int32(env, f->frame->coded_picture_number, &result);
@@ -635,7 +682,10 @@ napi_value setFrameCodedPicNum(napi_env env, napi_callback_info info) {
   size_t argc = 1;
   napi_value args[1];
 
-  status = napi_get_cb_info(env, info, &argc, args, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
+  CHECK_STATUS;
+
+  status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
   CHECK_STATUS;
   if (argc < 1) {
     NAPI_THROW_ERROR("Set frame coded_picture_number must be provided with a value.");
@@ -658,7 +708,7 @@ napi_value getFrameDispPicNum(napi_env env, napi_callback_info info) {
   napi_value result;
   frameData* f;
 
-  status = napi_get_cb_info(env, info, 0, nullptr, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
   CHECK_STATUS;
 
   status = napi_create_int32(env, f->frame->display_picture_number, &result);
@@ -675,7 +725,10 @@ napi_value setFrameDispPicNum(napi_env env, napi_callback_info info) {
   size_t argc = 1;
   napi_value args[1];
 
-  status = napi_get_cb_info(env, info, &argc, args, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
+  CHECK_STATUS;
+
+  status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
   CHECK_STATUS;
   if (argc < 1) {
     NAPI_THROW_ERROR("Set frame display_picture_number must be provided with a value.");
@@ -698,7 +751,7 @@ napi_value getFrameQuality(napi_env env, napi_callback_info info) {
   napi_value result;
   frameData* f;
 
-  status = napi_get_cb_info(env, info, 0, nullptr, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
   CHECK_STATUS;
 
   status = napi_create_int32(env, f->frame->quality, &result);
@@ -715,7 +768,10 @@ napi_value setFrameQuality(napi_env env, napi_callback_info info) {
   size_t argc = 1;
   napi_value args[1];
 
-  status = napi_get_cb_info(env, info, &argc, args, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
+  CHECK_STATUS;
+
+  status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
   CHECK_STATUS;
   if (argc < 1) {
     NAPI_THROW_ERROR("Set frame quality must be provided with a value.");
@@ -738,7 +794,7 @@ napi_value getFrameRepeatPict(napi_env env, napi_callback_info info) {
   napi_value result;
   frameData* f;
 
-  status = napi_get_cb_info(env, info, 0, nullptr, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
   CHECK_STATUS;
 
   status = napi_create_int32(env, f->frame->repeat_pict, &result);
@@ -755,7 +811,10 @@ napi_value setFrameRepeatPict(napi_env env, napi_callback_info info) {
   size_t argc = 1;
   napi_value args[1];
 
-  status = napi_get_cb_info(env, info, &argc, args, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
+  CHECK_STATUS;
+
+  status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
   CHECK_STATUS;
   if (argc < 1) {
     NAPI_THROW_ERROR("Set frame repeat_pict must be provided with a value.");
@@ -778,7 +837,7 @@ napi_value getFrameInterlaced(napi_env env, napi_callback_info info) {
   napi_value result;
   frameData* f;
 
-  status = napi_get_cb_info(env, info, 0, nullptr, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
   CHECK_STATUS;
 
   status = napi_get_boolean(env, f->frame->interlaced_frame == 1, &result);
@@ -796,7 +855,10 @@ napi_value setFrameInterlaced(napi_env env, napi_callback_info info) {
   size_t argc = 1;
   napi_value args[1];
 
-  status = napi_get_cb_info(env, info, &argc, args, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
+  CHECK_STATUS;
+
+  status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
   CHECK_STATUS;
   if (argc < 1) {
     NAPI_THROW_ERROR("Set frame interlaced_frame must be provided with a value.");
@@ -820,7 +882,7 @@ napi_value getFrameTopFieldFirst(napi_env env, napi_callback_info info) {
   napi_value result;
   frameData* f;
 
-  status = napi_get_cb_info(env, info, 0, nullptr, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
   CHECK_STATUS;
 
   status = napi_get_boolean(env, f->frame->top_field_first == 1, &result);
@@ -838,7 +900,10 @@ napi_value setFrameTopFieldFirst(napi_env env, napi_callback_info info) {
   size_t argc = 1;
   napi_value args[1];
 
-  status = napi_get_cb_info(env, info, &argc, args, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
+  CHECK_STATUS;
+
+  status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
   CHECK_STATUS;
   if (argc < 1) {
     NAPI_THROW_ERROR("Set frame top_field_first must be provided with a value.");
@@ -862,7 +927,7 @@ napi_value getFramePalHasChanged(napi_env env, napi_callback_info info) {
   napi_value result;
   frameData* f;
 
-  status = napi_get_cb_info(env, info, 0, nullptr, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
   CHECK_STATUS;
 
   status = napi_get_boolean(env, f->frame->palette_has_changed == 1, &result);
@@ -880,7 +945,10 @@ napi_value setFramePalHasChanged(napi_env env, napi_callback_info info) {
   size_t argc = 1;
   napi_value args[1];
 
-  status = napi_get_cb_info(env, info, &argc, args, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
+  CHECK_STATUS;
+
+  status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
   CHECK_STATUS;
   if (argc < 1) {
     NAPI_THROW_ERROR("Set frame palette_has_changed must be provided with a value.");
@@ -904,7 +972,7 @@ napi_value getFrameReorderOpq(napi_env env, napi_callback_info info) {
   napi_value result;
   frameData* f;
 
-  status = napi_get_cb_info(env, info, 0, nullptr, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
   CHECK_STATUS;
 
   if (f->frame->reordered_opaque == AV_NOPTS_VALUE) {
@@ -926,7 +994,10 @@ napi_value setFrameReorderOpq(napi_env env, napi_callback_info info) {
   size_t argc = 1;
   napi_value args[1];
 
-  status = napi_get_cb_info(env, info, &argc, args, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
+  CHECK_STATUS;
+
+  status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
   CHECK_STATUS;
   if (argc < 1) {
     NAPI_THROW_ERROR("Set frame reordered_opaque must be provided with a value.");
@@ -955,7 +1026,7 @@ napi_value getFrameSampleRate(napi_env env, napi_callback_info info) {
   napi_value result;
   frameData* f;
 
-  status = napi_get_cb_info(env, info, 0, nullptr, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
   CHECK_STATUS;
 
   status = napi_create_int32(env, f->frame->sample_rate, &result);
@@ -972,7 +1043,10 @@ napi_value setFrameSampleRate(napi_env env, napi_callback_info info) {
   size_t argc = 1;
   napi_value args[1];
 
-  status = napi_get_cb_info(env, info, &argc, args, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
+  CHECK_STATUS;
+
+  status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
   CHECK_STATUS;
   if (argc < 1) {
     NAPI_THROW_ERROR("Set frame sample_rate must be provided with a value.");
@@ -995,7 +1069,7 @@ napi_value getFrameChanLayout(napi_env env, napi_callback_info info) {
   napi_value result;
   frameData* f;
 
-  status = napi_get_cb_info(env, info, 0, nullptr, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
   CHECK_STATUS;
 
   char channelLayoutName[64];
@@ -1018,7 +1092,10 @@ napi_value setFrameChanLayout(napi_env env, napi_callback_info info) {
   size_t argc = 1;
   napi_value args[1];
 
-  status = napi_get_cb_info(env, info, &argc, args, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
+  CHECK_STATUS;
+
+  status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
   CHECK_STATUS;
   if (argc < 1) {
     NAPI_THROW_ERROR("Set frame channel_layout must be provided with a value.");
@@ -1056,7 +1133,7 @@ napi_value getFrameData(napi_env env, napi_callback_info info) {
   size_t size;
   int curElem;
 
-  status = napi_get_cb_info(env, info, 0, nullptr, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
   CHECK_STATUS;
 
   status = napi_create_array(env, &array);
@@ -1113,7 +1190,10 @@ napi_value setFrameData(napi_env env, napi_callback_info info) {
   size_t argc = 1;
   napi_value args[1];
 
-  status = napi_get_cb_info(env, info, &argc, args, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
+  CHECK_STATUS;
+
+  status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
   CHECK_STATUS;
   if (argc < 1) {
     NAPI_THROW_ERROR("Set packet data must be provided with an array of buffer values.");
@@ -1202,7 +1282,7 @@ napi_value getFrameSideData(napi_env env, napi_callback_info info) {
   void* resultData;
   frameData* f;
 
-  status = napi_get_cb_info(env, info, 0, nullptr, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
   CHECK_STATUS;
 
   if (f->frame->nb_side_data <= 0) {
@@ -1242,7 +1322,10 @@ napi_value setFrameSideData(napi_env env, napi_callback_info info) {
 
   size_t argc = 1;
   napi_value args[1];
-  status = napi_get_cb_info(env, info, &argc, args, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
+  CHECK_STATUS;
+
+  status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
   CHECK_STATUS;
   if (argc < 1) {
     NAPI_THROW_ERROR("Set frame flags must be provided with a value.");
@@ -1334,7 +1417,7 @@ napi_value getFrameFlags(napi_env env, napi_callback_info info) {
   napi_value result;
   frameData* f;
 
-  status = napi_get_cb_info(env, info, 0, nullptr, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
   CHECK_STATUS;
 
   status = napi_create_object(env, &result);
@@ -1357,7 +1440,10 @@ napi_value setFrameFlags(napi_env env, napi_callback_info info) {
   size_t argc = 1;
   napi_value args[1];
 
-  status = napi_get_cb_info(env, info, &argc, args, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
+  CHECK_STATUS;
+
+  status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
   CHECK_STATUS;
   if (argc < 1) {
     NAPI_THROW_ERROR("Set frame flags must be provided with a value.");
@@ -1389,7 +1475,7 @@ napi_value getFrameColorRange(napi_env env, napi_callback_info info) {
   frameData* f;
   const char* enumName;
 
-  status = napi_get_cb_info(env, info, 0, nullptr, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
   CHECK_STATUS;
 
   enumName = av_color_range_name(f->frame->color_range);
@@ -1412,7 +1498,10 @@ napi_value setFrameColorRange(napi_env env, napi_callback_info info) {
   size_t argc = 1;
   napi_value args[1];
 
-  status = napi_get_cb_info(env, info, &argc, args, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
+  CHECK_STATUS;
+
+  status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
   CHECK_STATUS;
   if (argc < 1) {
     NAPI_THROW_ERROR("Set frame color_range must be provided with a value.");
@@ -1451,7 +1540,7 @@ napi_value getFrameColorPrimaries(napi_env env, napi_callback_info info) {
   frameData* f;
   const char* enumName;
 
-  status = napi_get_cb_info(env, info, 0, nullptr, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
   CHECK_STATUS;
 
   enumName = av_color_primaries_name(f->frame->color_primaries);
@@ -1474,7 +1563,10 @@ napi_value setFrameColorPrimaries(napi_env env, napi_callback_info info) {
   size_t argc = 1;
   napi_value args[1];
 
-  status = napi_get_cb_info(env, info, &argc, args, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
+  CHECK_STATUS;
+
+  status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
   CHECK_STATUS;
   if (argc < 1) {
     NAPI_THROW_ERROR("Set frame color_primaries must be provided with a value.");
@@ -1513,7 +1605,7 @@ napi_value getFrameColorTrc(napi_env env, napi_callback_info info) {
   frameData* f;
   const char* enumName;
 
-  status = napi_get_cb_info(env, info, 0, nullptr, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
   CHECK_STATUS;
 
   enumName = av_color_transfer_name(f->frame->color_trc);
@@ -1536,7 +1628,10 @@ napi_value setFrameColorTrc(napi_env env, napi_callback_info info) {
   size_t argc = 1;
   napi_value args[1];
 
-  status = napi_get_cb_info(env, info, &argc, args, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
+  CHECK_STATUS;
+
+  status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
   CHECK_STATUS;
   if (argc < 1) {
     NAPI_THROW_ERROR("Set frame color_trc must be provided with a value.");
@@ -1575,7 +1670,7 @@ napi_value getFrameColorspace(napi_env env, napi_callback_info info) {
   frameData* f;
   const char* enumName;
 
-  status = napi_get_cb_info(env, info, 0, nullptr, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
   CHECK_STATUS;
 
   enumName = av_color_space_name(f->frame->colorspace);
@@ -1598,7 +1693,10 @@ napi_value setFrameColorspace(napi_env env, napi_callback_info info) {
   size_t argc = 1;
   napi_value args[1];
 
-  status = napi_get_cb_info(env, info, &argc, args, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
+  CHECK_STATUS;
+
+  status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
   CHECK_STATUS;
   if (argc < 1) {
     NAPI_THROW_ERROR("Set frame colorspace must be provided with a value.");
@@ -1637,7 +1735,7 @@ napi_value getFrameChromaLoc(napi_env env, napi_callback_info info) {
   frameData* f;
   const char* enumName;
 
-  status = napi_get_cb_info(env, info, 0, nullptr, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
   CHECK_STATUS;
 
   enumName = av_chroma_location_name(f->frame->chroma_location);
@@ -1660,7 +1758,10 @@ napi_value setFrameChromaLoc(napi_env env, napi_callback_info info) {
   size_t argc = 1;
   napi_value args[1];
 
-  status = napi_get_cb_info(env, info, &argc, args, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
+  CHECK_STATUS;
+
+  status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
   CHECK_STATUS;
   if (argc < 1) {
     NAPI_THROW_ERROR("Set frame chroma_location must be provided with a value.");
@@ -1698,7 +1799,7 @@ napi_value getFrameBestEffortTS(napi_env env, napi_callback_info info) {
   napi_value result;
   frameData* f;
 
-  status = napi_get_cb_info(env, info, 0, nullptr, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
   CHECK_STATUS;
 
   if (f->frame->best_effort_timestamp == AV_NOPTS_VALUE) {
@@ -1721,7 +1822,10 @@ napi_value setFrameBestEffortTS(napi_env env, napi_callback_info info) {
   size_t argc = 1;
   napi_value args[1];
 
-  status = napi_get_cb_info(env, info, &argc, args, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
+  CHECK_STATUS;
+
+  status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
   CHECK_STATUS;
   if (argc < 1) {
     NAPI_THROW_ERROR("Set frame best_effort_timestamp must be provided with a value.");
@@ -1749,7 +1853,7 @@ napi_value getFramePktPos(napi_env env, napi_callback_info info) {
   napi_value result;
   frameData* f;
 
-  status = napi_get_cb_info(env, info, 0, nullptr, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
   CHECK_STATUS;
 
   status = napi_create_int64(env, f->frame->pkt_pos, &result);
@@ -1766,7 +1870,10 @@ napi_value setFramePktPos(napi_env env, napi_callback_info info) {
   size_t argc = 1;
   napi_value args[1];
 
-  status = napi_get_cb_info(env, info, &argc, args, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
+  CHECK_STATUS;
+
+  status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
   CHECK_STATUS;
   if (argc < 1) {
     NAPI_THROW_ERROR("Set frame pkt_pos must be provided with a value.");
@@ -1789,7 +1896,7 @@ napi_value getFramePktDuration(napi_env env, napi_callback_info info) {
   napi_value result;
   frameData* f;
 
-  status = napi_get_cb_info(env, info, 0, nullptr, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
   CHECK_STATUS;
 
   status = napi_create_int64(env, f->frame->pkt_duration, &result);
@@ -1806,7 +1913,10 @@ napi_value setFramePktDuration(napi_env env, napi_callback_info info) {
   size_t argc = 1;
   napi_value args[1];
 
-  status = napi_get_cb_info(env, info, &argc, args, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
+  CHECK_STATUS;
+
+  status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
   CHECK_STATUS;
   if (argc < 1) {
     NAPI_THROW_ERROR("Set frame pkt_duration must be provided with a value.");
@@ -1830,7 +1940,7 @@ napi_value getFrameMetadata(napi_env env, napi_callback_info info) {
   frameData* f;
   AVDictionaryEntry* tag = nullptr;
 
-  status = napi_get_cb_info(env, info, 0, nullptr, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
   CHECK_STATUS;
 
   if (f->frame->metadata != nullptr) {
@@ -1858,7 +1968,10 @@ napi_value setFrameMetadata(napi_env env, napi_callback_info info) {
   size_t argc = 1;
   napi_value args[1];
 
-  status = napi_get_cb_info(env, info, &argc, args, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
+  CHECK_STATUS;
+
+  status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
   CHECK_STATUS;
   if (argc < 1) {
     NAPI_THROW_ERROR("Set metadata must be provided with a value.");
@@ -1887,7 +2000,7 @@ napi_value getFrameDecodeErrFlags(napi_env env, napi_callback_info info) {
   napi_value result;
   frameData* f;
 
-  status = napi_get_cb_info(env, info, 0, nullptr, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
   CHECK_STATUS;
 
   status = napi_create_object(env, &result);
@@ -1913,7 +2026,10 @@ napi_value setFrameDecodeErrFlags(napi_env env, napi_callback_info info) {
   size_t argc = 1;
   napi_value args[1];
 
-  status = napi_get_cb_info(env, info, &argc, args, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
+  CHECK_STATUS;
+
+  status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
   CHECK_STATUS;
   if (argc < 1) {
     NAPI_THROW_ERROR("Set decode_error_flags must be provided with a value.");
@@ -1945,7 +2061,7 @@ napi_value getFrameChannels(napi_env env, napi_callback_info info) {
   napi_value result;
   frameData* f;
 
-  status = napi_get_cb_info(env, info, 0, nullptr, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
   CHECK_STATUS;
 
   status = napi_create_int32(env, f->frame->channels, &result);
@@ -1962,7 +2078,10 @@ napi_value setFrameChannels(napi_env env, napi_callback_info info) {
   size_t argc = 1;
   napi_value args[1];
 
-  status = napi_get_cb_info(env, info, &argc, args, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
+  CHECK_STATUS;
+
+  status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
   CHECK_STATUS;
   if (argc < 1) {
     NAPI_THROW_ERROR("Set frame channels must be provided with a value.");
@@ -1985,7 +2104,7 @@ napi_value getFramePktSize(napi_env env, napi_callback_info info) {
   napi_value result;
   frameData* f;
 
-  status = napi_get_cb_info(env, info, 0, nullptr, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
   CHECK_STATUS;
 
   status = napi_create_int32(env, f->frame->pkt_size, &result);
@@ -2002,7 +2121,10 @@ napi_value setFramePktSize(napi_env env, napi_callback_info info) {
   size_t argc = 1;
   napi_value args[1];
 
-  status = napi_get_cb_info(env, info, &argc, args, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
+  CHECK_STATUS;
+
+  status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
   CHECK_STATUS;
   if (argc < 1) {
     NAPI_THROW_ERROR("Set frame pkt_size must be provided with a value.");
@@ -2025,8 +2147,7 @@ napi_value getFrameHWFramesCtx(napi_env env, napi_callback_info info) {
   napi_value result;
   frameData* f;
 
-  size_t argc = 0;
-  status = napi_get_cb_info(env, info, &argc, nullptr, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
   CHECK_STATUS;
 
   if (f->frame->hw_frames_ctx == nullptr) {
@@ -2049,7 +2170,10 @@ napi_value setFrameHWFramesCtx(napi_env env, napi_callback_info info) {
 
   size_t argc = 1;
   napi_value args[1];
-  status = napi_get_cb_info(env, info, &argc, args, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
+  CHECK_STATUS;
+
+  status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
   CHECK_STATUS;
   if (argc < 1) {
     NAPI_THROW_ERROR("A value is required to set the hw_frames_context property.");
@@ -2075,7 +2199,7 @@ napi_value getFrameCropTop(napi_env env, napi_callback_info info) {
   napi_value result;
   frameData* f;
 
-  status = napi_get_cb_info(env, info, 0, nullptr, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
   CHECK_STATUS;
 
   status = napi_create_int32(env, f->frame->crop_top, &result);
@@ -2092,7 +2216,10 @@ napi_value setFrameCropTop(napi_env env, napi_callback_info info) {
   size_t argc = 1;
   napi_value args[1];
 
-  status = napi_get_cb_info(env, info, &argc, args, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
+  CHECK_STATUS;
+
+  status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
   CHECK_STATUS;
   if (argc < 1) {
     NAPI_THROW_ERROR("Set frame crop_top must be provided with a value.");
@@ -2115,7 +2242,7 @@ napi_value getFrameCropBottom(napi_env env, napi_callback_info info) {
   napi_value result;
   frameData* f;
 
-  status = napi_get_cb_info(env, info, 0, nullptr, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
   CHECK_STATUS;
 
   status = napi_create_int32(env, f->frame->crop_bottom, &result);
@@ -2132,7 +2259,10 @@ napi_value setFrameCropBottom(napi_env env, napi_callback_info info) {
   size_t argc = 1;
   napi_value args[1];
 
-  status = napi_get_cb_info(env, info, &argc, args, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
+  CHECK_STATUS;
+
+  status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
   CHECK_STATUS;
   if (argc < 1) {
     NAPI_THROW_ERROR("Set frame crop_bottom must be provided with a value.");
@@ -2155,7 +2285,7 @@ napi_value getFrameCropLeft(napi_env env, napi_callback_info info) {
   napi_value result;
   frameData* f;
 
-  status = napi_get_cb_info(env, info, 0, nullptr, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
   CHECK_STATUS;
 
   status = napi_create_int32(env, f->frame->crop_left, &result);
@@ -2172,7 +2302,10 @@ napi_value setFrameCropLeft(napi_env env, napi_callback_info info) {
   size_t argc = 1;
   napi_value args[1];
 
-  status = napi_get_cb_info(env, info, &argc, args, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
+  CHECK_STATUS;
+
+  status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
   CHECK_STATUS;
   if (argc < 1) {
     NAPI_THROW_ERROR("Set frame crop_left must be provided with a value.");
@@ -2195,7 +2328,7 @@ napi_value getFrameCropRight(napi_env env, napi_callback_info info) {
   napi_value result;
   frameData* f;
 
-  status = napi_get_cb_info(env, info, 0, nullptr, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
   CHECK_STATUS;
 
   status = napi_create_int32(env, f->frame->crop_right, &result);
@@ -2212,7 +2345,10 @@ napi_value setFrameCropRight(napi_env env, napi_callback_info info) {
   size_t argc = 1;
   napi_value args[1];
 
-  status = napi_get_cb_info(env, info, &argc, args, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
+  CHECK_STATUS;
+
+  status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
   CHECK_STATUS;
   if (argc < 1) {
     NAPI_THROW_ERROR("Set frame crop_right must be provided with a value.");
@@ -2415,7 +2551,7 @@ napi_value getFrameBufSizes(napi_env env, napi_callback_info info) {
   frameData* f;
   uint32_t bufLengths;
 
-  status = napi_get_cb_info(env, info, 0, nullptr, nullptr, (void**) &f);
+  status = getFrameFromCallbackInfo(env, info, &f);
   CHECK_STATUS;
 
   if (f->frame->buf[0] == nullptr) {
@@ -2522,9 +2658,128 @@ napi_value frameToJSON(napi_env env, napi_callback_info info) {
   return result;
 }
 
+static napi_value frame_constructor(napi_env env, napi_callback_info cb_info) {
+  napi_value undefined;
+  napi_get_undefined(env, &undefined);
+  return undefined;
+}
+
+static napi_ref frame_class_ref = NULL;
+
+static napi_value maybe_create_frame_class(napi_env env) {
+  napi_status status;
+  napi_value frame_class;
+
+  if (frame_class_ref) {
+    status = napi_get_reference_value(env, frame_class_ref, &frame_class);
+    CHECK_STATUS;
+
+    return frame_class;
+  }
+
+  // TODO frame side data
+  napi_property_descriptor desc[] = {
+    { "type", nullptr, nullptr, getFrameTypeName, nop, nullptr, napi_enumerable, nullptr },
+    { "linesize", nullptr, nullptr, getFrameLinesize, setFrameLinesize, nullptr,
+      (napi_property_attributes) (napi_writable | napi_enumerable), nullptr },
+    { "width", nullptr, nullptr, getFrameWidth, setFrameWidth, nullptr,
+      (napi_property_attributes) (napi_writable | napi_enumerable), nullptr },
+    { "height", nullptr, nullptr, getFrameHeight, setFrameHeight, nullptr,
+      (napi_property_attributes) (napi_writable | napi_enumerable), nullptr },
+    { "nb_samples", nullptr, nullptr, getFrameNbSamples, setFrameNbSamples, nullptr,
+      (napi_property_attributes) (napi_writable | napi_enumerable), nullptr },
+    { "format", nullptr, nullptr, getFrameFormat, setFrameFormat, nullptr,
+      (napi_property_attributes) (napi_writable | napi_enumerable), nullptr },
+    { "key_frame", nullptr, nullptr, getFrameKeyFrame, setFrameKeyFrame, nullptr,
+      (napi_property_attributes) (napi_writable | napi_enumerable), nullptr },
+    { "pict_type", nullptr, nullptr, getFramePictType, setFramePictType, nullptr,
+      (napi_property_attributes) (napi_writable | napi_enumerable), nullptr },
+    { "sample_aspect_ratio", nullptr, nullptr, getFrameSampleAR, setFrameSampleAR, nullptr,
+      (napi_property_attributes) (napi_writable | napi_enumerable), nullptr },
+    // 10
+    { "pts", nullptr, nullptr, getFramePTS, setFramePTS, nullptr,
+      (napi_property_attributes) (napi_writable | napi_enumerable), nullptr },
+    { "pkt_dts", nullptr, nullptr, getFramePktDTS, setFramePktDTS, nullptr,
+      (napi_property_attributes) (napi_writable | napi_enumerable), nullptr },
+    { "coded_picture_number", nullptr, nullptr, getFrameCodedPicNum, setFrameCodedPicNum, nullptr,
+      (napi_property_attributes) (napi_writable | napi_enumerable), nullptr },
+    { "display_picture_number", nullptr, nullptr, getFrameDispPicNum, setFrameDispPicNum, nullptr,
+      (napi_property_attributes) (napi_writable | napi_enumerable), nullptr },
+    { "quality", nullptr, nullptr, getFrameQuality, setFrameQuality, nullptr,
+      (napi_property_attributes) (napi_writable | napi_enumerable), nullptr },
+    { "repeat_pict", nullptr, nullptr, getFrameRepeatPict, setFrameRepeatPict, nullptr,
+      (napi_property_attributes) (napi_writable | napi_enumerable), nullptr },
+    { "interlaced_frame", nullptr, nullptr, getFrameInterlaced, setFrameInterlaced, nullptr,
+      (napi_property_attributes) (napi_writable | napi_enumerable), nullptr },
+    { "top_field_first", nullptr, nullptr, getFrameTopFieldFirst, setFrameTopFieldFirst, nullptr,
+      (napi_property_attributes) (napi_writable | napi_enumerable), nullptr },
+    { "palette_has_changed", nullptr, nullptr, getFramePalHasChanged, setFramePalHasChanged, nullptr,
+      (napi_property_attributes) (napi_writable | napi_enumerable), nullptr },
+    { "reordered_opaque", nullptr, nullptr, getFrameReorderOpq, setFrameReorderOpq, nullptr,
+      (napi_property_attributes) (napi_writable | napi_enumerable), nullptr },
+    // 20
+    { "sample_rate", nullptr, nullptr, getFrameSampleRate, setFrameSampleRate, nullptr,
+      (napi_property_attributes) (napi_writable | napi_enumerable), nullptr },
+    { "channel_layout", nullptr, nullptr, getFrameChanLayout, setFrameChanLayout, nullptr,
+      (napi_property_attributes) (napi_writable | napi_enumerable), nullptr },
+    { "data", nullptr, nullptr, getFrameData, setFrameData, nullptr,
+      (napi_property_attributes) (napi_writable | napi_enumerable), nullptr },
+    { "side_data", nullptr, nullptr, getFrameSideData, setFrameSideData, nullptr,
+      (napi_property_attributes) (napi_writable | napi_enumerable), nullptr },
+    { "flags", nullptr, nullptr, getFrameFlags, setFrameFlags, nullptr,
+      (napi_property_attributes) (napi_writable | napi_enumerable), nullptr },
+    { "color_range", nullptr, nullptr, getFrameColorRange, setFrameColorRange, nullptr,
+      (napi_property_attributes) (napi_writable | napi_enumerable), nullptr },
+    { "color_primaries", nullptr, nullptr, getFrameColorPrimaries, setFrameColorPrimaries, nullptr,
+      (napi_property_attributes) (napi_writable | napi_enumerable), nullptr },
+    { "color_trc", nullptr, nullptr, getFrameColorTrc, setFrameColorTrc, nullptr,
+      (napi_property_attributes) (napi_writable | napi_enumerable), nullptr },
+    { "colorspace", nullptr, nullptr, getFrameColorspace, setFrameColorspace, nullptr,
+      (napi_property_attributes) (napi_writable | napi_enumerable), nullptr },
+    { "chroma_location", nullptr, nullptr, getFrameChromaLoc, setFrameChromaLoc, nullptr,
+      (napi_property_attributes) (napi_writable | napi_enumerable), nullptr },
+    // 30
+    { "best_effort_timestamp", nullptr, nullptr, getFrameBestEffortTS, setFrameBestEffortTS, nullptr,
+      (napi_property_attributes) (napi_writable | napi_enumerable), nullptr },
+    { "pkt_pos", nullptr, nullptr, getFramePktPos, setFramePktPos, nullptr,
+      (napi_property_attributes) (napi_writable | napi_enumerable), nullptr },
+    { "pkt_duration", nullptr, nullptr, getFramePktDuration, setFramePktDuration, nullptr,
+      (napi_property_attributes) (napi_writable | napi_enumerable), nullptr },
+    { "metadata", nullptr, nullptr, getFrameMetadata, setFrameMetadata, nullptr,
+      (napi_property_attributes) (napi_writable | napi_enumerable), nullptr },
+    { "decode_error_flags", nullptr, nullptr, getFrameDecodeErrFlags, setFrameDecodeErrFlags, nullptr,
+      (napi_property_attributes) (napi_writable | napi_enumerable), nullptr },
+    { "channels", nullptr, nullptr, getFrameChannels, setFrameChannels, nullptr,
+      (napi_property_attributes) (napi_writable | napi_enumerable), nullptr },
+    { "pkt_size", nullptr, nullptr, getFramePktSize, setFramePktSize, nullptr,
+      (napi_property_attributes) (napi_writable | napi_enumerable), nullptr },
+    { "hw_frames_ctx", nullptr, nullptr, getFrameHWFramesCtx, setFrameHWFramesCtx, nullptr,
+      (napi_property_attributes) (napi_writable | napi_enumerable), nullptr},
+    { "crop_top", nullptr, nullptr, getFrameCropTop, setFrameCropTop, nullptr,
+      (napi_property_attributes) (napi_writable | napi_enumerable), nullptr },
+    { "crop_bottom", nullptr, nullptr, getFrameCropBottom, setFrameCropBottom, nullptr,
+      (napi_property_attributes) (napi_writable | napi_enumerable), nullptr },
+    // 40
+    { "crop_left", nullptr, nullptr, getFrameCropLeft, setFrameCropLeft, nullptr,
+      (napi_property_attributes) (napi_writable | napi_enumerable), nullptr },
+    { "crop_right", nullptr, nullptr, getFrameCropRight, setFrameCropRight, nullptr,
+      (napi_property_attributes) (napi_writable | napi_enumerable), nullptr },
+    { "alloc", nullptr, alloc, nullptr, nullptr, nullptr, napi_enumerable, nullptr },
+    { "toJSON", nullptr, frameToJSON, nullptr, nullptr, nullptr, napi_default, nullptr },
+  };
+
+  status = napi_define_class(env, "AVFrame", NAPI_AUTO_LENGTH, frame_constructor, nullptr, sizeof(desc) / sizeof(desc[0]), desc, &frame_class);
+  CHECK_STATUS;
+
+  status = napi_create_reference(env, frame_class, 1, &frame_class_ref);
+  CHECK_STATUS;
+
+  return frame_class;
+}
+
 napi_status fromAVFrame(napi_env env, frameData* f, napi_value* result) {
   napi_status status;
-  napi_value jsFrame, extFrame, undef;
+  napi_value jsFrameConstructor, jsFrame, extFrame, undef;
   int64_t externalMemory;
 
   status = napi_create_object(env, &jsFrame);
@@ -2533,99 +2788,12 @@ napi_status fromAVFrame(napi_env env, frameData* f, napi_value* result) {
   PASS_STATUS;
   status = napi_create_external(env, f, frameDataFinalizer, nullptr, &extFrame);
   PASS_STATUS;
+  
+  jsFrameConstructor = maybe_create_frame_class(env);
+  status = napi_new_instance(env, jsFrameConstructor, 0, NULL, &jsFrame);
+  PASS_STATUS;
 
-  // TODO frame side data
-  napi_property_descriptor desc[] = {
-    { "type", nullptr, nullptr, getFrameTypeName, nop, nullptr, napi_enumerable, nullptr },
-    { "linesize", nullptr, nullptr, getFrameLinesize, setFrameLinesize, nullptr,
-      (napi_property_attributes) (napi_writable | napi_enumerable), f },
-    { "width", nullptr, nullptr, getFrameWidth, setFrameWidth, nullptr,
-      (napi_property_attributes) (napi_writable | napi_enumerable), f },
-    { "height", nullptr, nullptr, getFrameHeight, setFrameHeight, nullptr,
-      (napi_property_attributes) (napi_writable | napi_enumerable), f },
-    { "nb_samples", nullptr, nullptr, getFrameNbSamples, setFrameNbSamples, nullptr,
-      (napi_property_attributes) (napi_writable | napi_enumerable), f },
-    { "format", nullptr, nullptr, getFrameFormat, setFrameFormat, nullptr,
-      (napi_property_attributes) (napi_writable | napi_enumerable), f },
-    { "key_frame", nullptr, nullptr, getFrameKeyFrame, setFrameKeyFrame, nullptr,
-      (napi_property_attributes) (napi_writable | napi_enumerable), f },
-    { "pict_type", nullptr, nullptr, getFramePictType, setFramePictType, nullptr,
-      (napi_property_attributes) (napi_writable | napi_enumerable), f },
-    { "sample_aspect_ratio", nullptr, nullptr, getFrameSampleAR, setFrameSampleAR, nullptr,
-      (napi_property_attributes) (napi_writable | napi_enumerable), f },
-    // 10
-    { "pts", nullptr, nullptr, getFramePTS, setFramePTS, nullptr,
-      (napi_property_attributes) (napi_writable | napi_enumerable), f },
-    { "pkt_dts", nullptr, nullptr, getFramePktDTS, setFramePktDTS, nullptr,
-      (napi_property_attributes) (napi_writable | napi_enumerable), f },
-    { "coded_picture_number", nullptr, nullptr, getFrameCodedPicNum, setFrameCodedPicNum, nullptr,
-      (napi_property_attributes) (napi_writable | napi_enumerable), f },
-    { "display_picture_number", nullptr, nullptr, getFrameDispPicNum, setFrameDispPicNum, nullptr,
-      (napi_property_attributes) (napi_writable | napi_enumerable), f },
-    { "quality", nullptr, nullptr, getFrameQuality, setFrameQuality, nullptr,
-      (napi_property_attributes) (napi_writable | napi_enumerable), f },
-    { "repeat_pict", nullptr, nullptr, getFrameRepeatPict, setFrameRepeatPict, nullptr,
-      (napi_property_attributes) (napi_writable | napi_enumerable), f },
-    { "interlaced_frame", nullptr, nullptr, getFrameInterlaced, setFrameInterlaced, nullptr,
-      (napi_property_attributes) (napi_writable | napi_enumerable), f },
-    { "top_field_first", nullptr, nullptr, getFrameTopFieldFirst, setFrameTopFieldFirst, nullptr,
-      (napi_property_attributes) (napi_writable | napi_enumerable), f },
-    { "palette_has_changed", nullptr, nullptr, getFramePalHasChanged, setFramePalHasChanged, nullptr,
-      (napi_property_attributes) (napi_writable | napi_enumerable), f },
-    { "reordered_opaque", nullptr, nullptr, getFrameReorderOpq, setFrameReorderOpq, nullptr,
-      (napi_property_attributes) (napi_writable | napi_enumerable), f },
-    // 20
-    { "sample_rate", nullptr, nullptr, getFrameSampleRate, setFrameSampleRate, nullptr,
-      (napi_property_attributes) (napi_writable | napi_enumerable), f },
-    { "channel_layout", nullptr, nullptr, getFrameChanLayout, setFrameChanLayout, nullptr,
-      (napi_property_attributes) (napi_writable | napi_enumerable), f },
-    { "data", nullptr, nullptr, getFrameData, setFrameData, nullptr,
-      (napi_property_attributes) (napi_writable | napi_enumerable), f },
-    { "side_data", nullptr, nullptr, getFrameSideData, setFrameSideData, nullptr,
-      (napi_property_attributes) (napi_writable | napi_enumerable), f },
-    { "flags", nullptr, nullptr, getFrameFlags, setFrameFlags, nullptr,
-      (napi_property_attributes) (napi_writable | napi_enumerable), f },
-    { "color_range", nullptr, nullptr, getFrameColorRange, setFrameColorRange, nullptr,
-      (napi_property_attributes) (napi_writable | napi_enumerable), f },
-    { "color_primaries", nullptr, nullptr, getFrameColorPrimaries, setFrameColorPrimaries, nullptr,
-      (napi_property_attributes) (napi_writable | napi_enumerable), f },
-    { "color_trc", nullptr, nullptr, getFrameColorTrc, setFrameColorTrc, nullptr,
-      (napi_property_attributes) (napi_writable | napi_enumerable), f },
-    { "colorspace", nullptr, nullptr, getFrameColorspace, setFrameColorspace, nullptr,
-      (napi_property_attributes) (napi_writable | napi_enumerable), f },
-    { "chroma_location", nullptr, nullptr, getFrameChromaLoc, setFrameChromaLoc, nullptr,
-      (napi_property_attributes) (napi_writable | napi_enumerable), f },
-    // 30
-    { "best_effort_timestamp", nullptr, nullptr, getFrameBestEffortTS, setFrameBestEffortTS, nullptr,
-      (napi_property_attributes) (napi_writable | napi_enumerable), f },
-    { "pkt_pos", nullptr, nullptr, getFramePktPos, setFramePktPos, nullptr,
-      (napi_property_attributes) (napi_writable | napi_enumerable), f },
-    { "pkt_duration", nullptr, nullptr, getFramePktDuration, setFramePktDuration, nullptr,
-      (napi_property_attributes) (napi_writable | napi_enumerable), f },
-    { "metadata", nullptr, nullptr, getFrameMetadata, setFrameMetadata, nullptr,
-      (napi_property_attributes) (napi_writable | napi_enumerable), f },
-    { "decode_error_flags", nullptr, nullptr, getFrameDecodeErrFlags, setFrameDecodeErrFlags, nullptr,
-      (napi_property_attributes) (napi_writable | napi_enumerable), f },
-    { "channels", nullptr, nullptr, getFrameChannels, setFrameChannels, nullptr,
-      (napi_property_attributes) (napi_writable | napi_enumerable), f },
-    { "pkt_size", nullptr, nullptr, getFramePktSize, setFramePktSize, nullptr,
-      (napi_property_attributes) (napi_writable | napi_enumerable), f },
-    { "hw_frames_ctx", nullptr, nullptr, getFrameHWFramesCtx, setFrameHWFramesCtx, nullptr,
-      (napi_property_attributes) (napi_writable | napi_enumerable), f},
-    { "crop_top", nullptr, nullptr, getFrameCropTop, setFrameCropTop, nullptr,
-      (napi_property_attributes) (napi_writable | napi_enumerable), f },
-    { "crop_bottom", nullptr, nullptr, getFrameCropBottom, setFrameCropBottom, nullptr,
-      (napi_property_attributes) (napi_writable | napi_enumerable), f },
-    // 40
-    { "crop_left", nullptr, nullptr, getFrameCropLeft, setFrameCropLeft, nullptr,
-      (napi_property_attributes) (napi_writable | napi_enumerable), f },
-    { "crop_right", nullptr, nullptr, getFrameCropRight, setFrameCropRight, nullptr,
-      (napi_property_attributes) (napi_writable | napi_enumerable), f },
-    { "alloc", nullptr, alloc, nullptr, nullptr, nullptr, napi_enumerable, nullptr },
-    { "toJSON", nullptr, frameToJSON, nullptr, nullptr, nullptr, napi_default, f },
-    { "_frame", nullptr, nullptr, nullptr, nullptr, extFrame, napi_default, nullptr }
-  };
-  status = napi_define_properties(env, jsFrame, 44, desc);
+  status = napi_set_named_property(env, jsFrame, "_frame", extFrame);
   PASS_STATUS;
 
   for ( int x = 0 ; x < AV_NUM_DATA_POINTERS ; x++ ) {
