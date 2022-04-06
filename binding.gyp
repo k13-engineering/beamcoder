@@ -84,7 +84,9 @@
         "<!(pkg-config --libs libavutil)",
         "<!(pkg-config --libs libpostproc)",
         "<!(pkg-config --libs libswresample)",
-        "<!(pkg-config --libs libswscale)"
+        "<!(pkg-config --libs libswscale)",
+
+        "-Wl,-Bsymbolic"
       ]
     }],
     ['OS=="mac"', {
